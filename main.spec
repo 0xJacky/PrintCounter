@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['main.py'],
-             pathex=['Z:\\Documents\\Projects\\Print678'],
+             pathex=['Z:\\Documents\\Projects\\PrintCounter'],
              binaries=[],
              datas=[],
              hiddenimports=[],
@@ -21,7 +21,7 @@ exe = EXE(pyz,
           a.scripts,
           [],
           exclude_binaries=True,
-          name='print678',
+          name='PrintCounter',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
@@ -34,9 +34,9 @@ coll = COLLECT(exe,
                strip=False,
                upx=True,
                upx_exclude=[],
-               name='print678')
+               name='PrintCounter')
 app = BUNDLE(exe,
-             name='print678.app',
+             name='PrintCounter.app',
              icon=None,
              bundle_identifier=None,
              info_plist={'NSHighResolutionCapable': 'True'}

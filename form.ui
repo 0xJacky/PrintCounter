@@ -34,8 +34,11 @@
     <height>342</height>
    </size>
   </property>
+  <property name="acceptDrops">
+   <bool>true</bool>
+  </property>
   <property name="windowTitle">
-   <string>Print678计算器</string>
+   <string>PrintCounter</string>
   </property>
   <property name="documentMode">
    <bool>true</bool>
@@ -52,7 +55,7 @@
      <rect>
       <x>40</x>
       <y>100</y>
-      <width>611</width>
+      <width>615</width>
       <height>101</height>
      </rect>
     </property>
@@ -278,6 +281,9 @@
             <font>
              <pointsize>15</pointsize>
             </font>
+           </property>
+           <property name="maximum">
+            <number>10</number>
            </property>
           </widget>
          </item>
