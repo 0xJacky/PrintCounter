@@ -1,0 +1,13 @@
+altgraph==0.17
+appscript==1.1.1
+docx2pdf==0.1.7
+macholib==1.14
+protobuf==3.13.0
+pyinstaller==4.1
+pyinstaller-hooks-contrib==2020.10
+PyPDF2==1.26.0
+PyQt5==5.15.1
+PyQt5-sip==4.19.24
+PyQt5-stubs==5.14.2.2
+six==1.15.0
+tqdm==4.53.0
