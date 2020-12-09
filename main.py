@@ -64,7 +64,7 @@ class PrintCounterMainWindow(QtWidgets.QMainWindow, Ui_Main):
             else:
                 filePath = event.mimeData().text().replace('file://', '')
             print(filePath, event.mimeData().text())
-            outputPath = './tmp.pdf'
+            outputPath = os.path.join(os.getcwd(), 'tmp.pdf')
             print(os.path.basename(event.mimeData().text()))
 
             if filePath.endswith('.pdf'):
