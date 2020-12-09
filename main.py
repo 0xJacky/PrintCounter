@@ -1,7 +1,8 @@
 import sys
 import os
+import platform
 from docx2pdf import convert
-from PyPDF2 import PdfFileReader
+from PyPDF2 import PdfFileReader, PdfFileWriter
 from PyQt5 import QtCore, QtWidgets
 from form import Ui_Main
 
@@ -58,9 +59,14 @@ class PrintCounterMainWindow(QtWidgets.QMainWindow, Ui_Main):
 
     def dropEvent(self, event):
         try:
-            filePath = event.mimeData().text().replace('file://', '')
+            if platform.system() == 'Windows':
+                filePath = event.mimeData().text().replace('file:///', '')
+            else:
+                filePath = event.mimeData().text().replace('file://', '')
+            print(filePath, event.mimeData().text())
             outputPath = './tmp.pdf'
             print(os.path.basename(event.mimeData().text()))
+
             if filePath.endswith('.pdf'):
                 reader = PdfFileReader(filePath)
             else:
