@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>693</width>
-    <height>342</height>
+    <width>690</width>
+    <height>340</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,20 +18,20 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>693</width>
-    <height>342</height>
+    <width>690</width>
+    <height>340</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>693</width>
-    <height>342</height>
+    <width>690</width>
+    <height>340</height>
    </size>
   </property>
   <property name="baseSize">
    <size>
-    <width>693</width>
-    <height>342</height>
+    <width>690</width>
+    <height>340</height>
    </size>
   </property>
   <property name="acceptDrops">
@@ -322,6 +322,12 @@
          <pointsize>20</pointsize>
         </font>
        </property>
+       <property name="smallDecimalPoint">
+        <bool>false</bool>
+       </property>
+       <property name="segmentStyle">
+        <enum>QLCDNumber::Flat</enum>
+       </property>
       </widget>
      </item>
      <item alignment="Qt::AlignRight">
@@ -341,37 +347,64 @@
    <widget class="QLabel" name="label_9">
     <property name="geometry">
      <rect>
-      <x>300</x>
+      <x>270</x>
       <y>290</y>
-      <width>141</width>
+      <width>151</width>
       <height>41</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>14</pointsize>
+      <pointsize>12</pointsize>
      </font>
     </property>
     <property name="text">
-     <string>© 余圳曦 2020 </string>
+     <string>© 余圳曦 2020-2021</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
     </property>
    </widget>
    <widget class="QPushButton" name="reset">
     <property name="geometry">
      <rect>
-      <x>300</x>
-      <y>240</y>
+      <x>287</x>
+      <y>250</y>
       <width>121</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>重置</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="notice">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>210</y>
+      <width>691</width>
       <height>41</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>15</pointsize>
+      <pointsize>12</pointsize>
      </font>
     </property>
     <property name="text">
-     <string>重置</string>
+     <string>提示信息</string>
+    </property>
+    <property name="scaledContents">
+     <bool>false</bool>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
     </property>
    </widget>
   </widget>

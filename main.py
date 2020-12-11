@@ -1,10 +1,17 @@
-import sys
 import os
 import platform
-from docx2pdf import convert
-from PyPDF2 import PdfFileReader, PdfFileWriter
+import shutil
+import sys
+import tempfile
+
+from PyPDF2 import PdfFileReader
 from PyQt5 import QtCore, QtWidgets
+from docx2pdf import convert
+from pdf2image import convert_from_path
+
+from doc2pdf import doc2pdf
 from form import Ui_Main
+from image import is_color_image
 
 
 class PrintCounterMainWindow(QtWidgets.QMainWindow, Ui_Main):
@@ -16,9 +23,12 @@ class PrintCounterMainWindow(QtWidgets.QMainWindow, Ui_Main):
     }
     spinBoxs = ['blackSingle', 'blackDouble', 'colorSingle', 'colorDouble']
 
+    fileName = ''
+
     def __init__(self):
         super(PrintCounterMainWindow, self).__init__()
         self.setupUi(self)
+        self.notice.setText(None)
         self.discount.setValue(10)
         self.total.setDigitCount(4)
         for box in self.spinBoxs:
@@ -33,7 +43,7 @@ class PrintCounterMainWindow(QtWidgets.QMainWindow, Ui_Main):
             total += int(getattr(self, box).text()) * self.price[box]
         discount = int(self.discount.text()) * 0.1
         total *= discount
-        print('total', total)
+        print('[Counter] total', total)
         self.total.display(total)
 
     def do_reset(self):
@@ -42,11 +52,19 @@ class PrintCounterMainWindow(QtWidgets.QMainWindow, Ui_Main):
 
         self.discount.setValue(10)
         self.total.display(0)
+        self.notice.setText(None)
 
-    def is_print_one_side(self, fileName=''):
+    def is_print_one_side(self):
         return \
             QtWidgets.QMessageBox \
-                .question(self, '提示', fileName + '是否为单面打印',
+                .question(self, '提示', self.fileName + ' 是否为单面打印',
+                          QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                          QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.Yes
+
+    def is_color_print(self):
+        return \
+            QtWidgets.QMessageBox \
+                .question(self, '提示', self.fileName + ' 是否为彩色打印',
                           QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
                           QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.Yes
 
@@ -58,33 +76,107 @@ class PrintCounterMainWindow(QtWidgets.QMainWindow, Ui_Main):
             event.ignore()
 
     def dropEvent(self, event):
+        self.notice.setText('正在计算，请稍等')
+        QtWidgets.qApp.processEvents()
         try:
             if platform.system() == 'Windows':
                 filePath = event.mimeData().text().replace('file:///', '')
             else:
                 filePath = event.mimeData().text().replace('file://', '')
-            print(filePath, event.mimeData().text())
-            outputPath = os.path.join(os.getcwd(), 'tmp.pdf')
-            print(os.path.basename(event.mimeData().text()))
 
+            print('[Counter] filepath, event data', filePath, event.mimeData().text())
+            outputPath = os.path.join(os.getcwd(), 'tmp.pdf')
             if filePath.endswith('.pdf'):
-                reader = PdfFileReader(filePath)
+                shutil.copyfile(filePath, outputPath)
+            elif filePath.endswith('.doc') and platform.system() == 'Windows':
+                doc2pdf(filePath, outputPath)
             else:
-                print(filePath)
                 convert(filePath, outputPath)
-                reader = PdfFileReader(outputPath)
+
+            reader = PdfFileReader(outputPath)
+
             page = reader.getNumPages()
+
+            self.fileName = os.path.basename(event.mimeData().text())
+            print('[Counter] file name', self.fileName)
+
+            blackSingle = 0
+            blackDouble = 0
+            colorSingle = 0
+            colorDouble = 0
+
+            with tempfile.TemporaryDirectory() as path:
+                if platform.system() == 'Windows':
+                    images_from_path = convert_from_path(outputPath, output_folder=path,
+                                                         poppler_path=r"C:\Users\Jacky\Desktop\Release-20.12.1\poppler-20.12.1\bin")
+                else:
+                    images_from_path = convert_from_path(outputPath, output_folder=path)
+                # 单面打印
+                if self.is_print_one_side():
+                    # 彩印
+                    if self.is_color_print():
+                        # 识别每一张图是否为彩色
+                        for image in images_from_path:
+                            if is_color_image(image):
+                                colorSingle += 1
+                            else:
+                                blackSingle += 1
+                        # 更新值
+                        self.blackSingle.setValue(int(self.blackSingle.text()) + blackSingle)
+                        self.colorSingle.setValue(int(self.colorSingle.text()) + colorSingle)
+                    # 黑白打印
+                    else:
+                        # 直接更新值
+                        self.blackSingle.setValue(int(self.blackSingle.text()) + page)
+                        blackSingle = page
+                # 双面打印
+                else:
+                    # 彩印
+                    if self.is_color_print():
+                        for i in range(0, page, 2):
+                            # 单数是彩色
+                            if is_color_image(images_from_path[i]):
+                                # 下一面没了
+                                if i + 1 >= page:
+                                    colorSingle += 1
+                                # 下一面还有，不管是啥都算彩色
+                                else:
+                                    colorDouble += 1
+                            # 单数是黑白
+                            else:
+                                # 下一面没了
+                                if i + 1 >= page:
+                                    blackSingle += 1
+                                # 下一面还有而且是彩色
+                                elif is_color_image(images_from_path[i + 1]):
+                                    colorDouble += 1
+                                # 下一面还有而且是黑白
+                                else:
+                                    blackDouble += 1
+                        self.blackSingle.setValue(int(self.blackSingle.text()) + blackSingle)
+                        self.blackDouble.setValue(int(self.blackDouble.text()) + blackDouble)
+                        self.colorSingle.setValue(int(self.colorSingle.text()) + colorSingle)
+                        self.colorDouble.setValue(int(self.colorDouble.text()) + colorDouble)
+                    # 黑白
+                    else:
+                        blackSingle = int(page) % 2
+                        blackDouble = int(page / 2)
+                        self.blackSingle.setValue(int(self.blackSingle.text()) + blackSingle)
+                        self.blackDouble.setValue(int(self.blackDouble.text()) + blackDouble)
+
             if os.path.exists(outputPath):
                 os.remove(outputPath)
-            print('add page', page)
-            if self.is_print_one_side(os.path.basename(event.mimeData().text())):
-                self.blackSingle.setValue(int(self.blackSingle.text()) + page)
-            else:
-                self.blackDouble.setValue(int(self.blackDouble.text()) + (int(page / 2)))
-                self.blackSingle.setValue(int(self.blackSingle.text()) + (int(page) % 2))
 
+            print('[Counter] add pages %s, blackSingle %s, blackDouble %s, colorSingle %s, colorDouble %s' % (page,
+                                                                                                              blackSingle,
+                                                                                                              blackDouble,
+                                                                                                              colorSingle,
+                                                                                                              colorDouble))
+            self.notice.setText(None)
         except Exception as e:
-            print(e)
+            print('[Counter] Error', e)
+            if os.path.exists(os.path.join(os.getcwd(), 'debug')):
+                self.notice.setText('计算错误 %s' % e)
 
 
 if __name__ == '__main__':

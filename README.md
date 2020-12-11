@@ -1,15 +1,32 @@
 # PrintCounter
-Version: 1.1
+Version: 1.2
 
-© 0xJacky 2020
+© 0xJacky 2020 - 2021
 
-支持在 MacOS 和 Windows 拖拽 Docx、PDF 到主窗口自动计算页数
+打印价格计算器
+
+## Features
+拖拽文件自动计算页数  
+支持文件类型
+
+| |doc|docx|pdf|
+|:----:|:----:|:----:|:----:|
+|Windows|√|√|√|
+|macOS|x|√|√|
 
 ## 依赖
 ```
 pip3 install -r requirements.txt
 ```
+### Poppler
+#### Windows
 
+Windows users will have to build or download poppler for Windows. I recommend [@oschwartz10612 version](https://github.com/oschwartz10612/poppler-windows/releases/) which is the most up-to-date. You will then have to add the `bin/` folder to [PATH](https://www.architectryan.com/2018/03/17/add-to-the-path-on-windows-10/) or use `poppler_path = r"C:\path\to\poppler-xx\bin" as an argument` in `convert_from_path`.
+
+#### Mac
+```
+brew install poppler
+```
 ## 编译
 ```
 pyinstaller main.spec
@@ -24,9 +41,6 @@ from PyInstaller.utils.hooks import collect_all
 datas, binaries, hiddenimports = collect_all('docx2pdf')
 ```
 https://github.com/AlJohri/docx2pdf/issues/5#issuecomment-671682876
-
-## TODO
-支持 Doc 文件在 Windows 下自动计算页数
 
 ## LICENSE
 MIT
